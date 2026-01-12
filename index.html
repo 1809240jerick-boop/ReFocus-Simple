@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ReFocus Pro - SEC JERICK</title>
+    <style>
+        :root { --p: #2563eb; --s: #10b981; --d: #ef4444; --bg: #f1f5f9; --txt: #1e293b; --card: #ffffff; --border: #e2e8f0; }
+        body.dark { --bg: #0f172a; --card: #1e293b; --txt: #f1f5f9; --border: #334155; }
+        * { box-sizing: border-box; touch-action: pan-y; outline: none; }
+        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); color: var(--txt); -webkit-tap-highlight-color: transparent; overflow: hidden; transition: background 0.3s; }
+        
+        /* Layout */
+        header { background: var(--card); padding: 1rem; font-weight: 800; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 100; }
+        .live-indicator { font-size: 0.65rem; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; font-weight: 900; }
+        .tag-f { background: #dbeafe; color: var(--p); }
+        .tag-r { background: #dcfce7; color: var(--s); }
+        .tag-off { background: #eee; color: #666; }
+
+        .container { max-width: 500px; margin: auto; height: calc(100vh - 65px); display: flex; flex-direction: column; padding: 1rem; overflow-y: auto; }
+        .section { background: var(--card); padding: 1.5rem; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 1rem; }
+        
+        /* Tabs */
+        .tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; background: #e2e8f0; padding: 6px; border-radius: 16px; }
+        .tabs button { flex: 1; padding: 12px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; background: transparent; color: #64748b; font-size: 0.85rem; transition: 0.3s; }
+        .tabs button.active { background: var(--card); color: var(--p); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        /* Modern Inputs */
+        label { font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; padding-left: 4px; }
+        input, select, textarea { width: 100%; padding: 14px; border-radius: 16px; border: 1.5px solid var(--border); background: var(--bg); color: var(--txt); font-size: 1rem; margin-bottom: 15px; transition: 0.2s; }
+        input:focus { border-color: var(--p); background: var(--card); }
+
+        /* Timer UI */
+        #timerDisplay { font-size: 4.5rem; font-weight: 800; text-align: center; margin: 10px 0; font-family: 'Courier New', monospace; letter-spacing: -2px; }
+        .btn-p { background: var(--p); color: #fff; width: 100%; padding: 18px; border: none; border-radius: 20px; font-weight: 800; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .btn-p:active { transform: scale(0.98); }
+        .progress { width: 100%; height: 12px; background: #eee; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
+        #bar { width: 0%; height: 100%; background: var(--p); transition: 0.2s linear; }
+
+        /* Records Split Viewer */
+        .record-split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .split-title { font-weight: 900; font-size: 0.7rem; color: var(--p); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; }
+        .mini-card { background: var(--bg); padding: 12px; border-radius: 16px; margin-bottom: 8px; border: 1px solid var(--border); font-size: 0.8rem; line-height: 1.4; }
+
+        /* Full Overlays (Settings/Lock) */
+        .full-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 1000; display: none; flex-direction: column; padding: 2rem; overflow-y: auto; }
+        .active-modal { display: flex; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        #welcomeOverlay { background: var(--p); color: white; z-index: 2000; display: none; justify-content: center; align-items: center; }
+        .fade-out { opacity: 0; pointer-events: none; transition: 0.6s; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="display:flex; align-items:center; gap:10px;">
+        <span style="letter-spacing:-0.5px;">ReFocus</span>
+        <span id="navTag" class="live-indicator tag-off">Offline</span>
+    </div>
+    <button style="background:var(--bg); border:none; width:40px; height:40px; border-radius:12px; cursor:pointer;" onclick="openSets()">⚙️</button>
+</header>
+
+<div id="welcomeOverlay">
+    <div style="text-align:center;">
+        <h1 style="font-size:5rem; margin:0;">🎯</h1>
+        <h2 style="font-size:1.8rem; font-weight:800;">Welcome Back, Jerick</h2>
+        <p style="opacity:0.8;">Syncing your focus sessions...</p>
+    </div>
+</div>
+
+<div id="lockScreen" class="full-overlay" style="display:flex; justify-content:center; align-items:center;">
+    <div style="text-align:center; width:100%; max-width:300px;">
+        <div style="font-size:4rem; margin-bottom:1rem;">🛡️</div>
+        <h2 style="margin:0 0 20px 0; font-weight:800;">App Locked</h2>
+        <input type="password" id="pinIn" placeholder="••••" style="text-align:center; font-size:2rem; letter-spacing:10px; border-radius:24px;">
+        <button class="btn-p" onclick="unlock()">Unlock Access</button>
+    </div>
+</div>
+
+<div id="setMod" class="full-overlay">
+    <div style="max-width:450px; margin:auto; width:100%;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+            <h2 style="margin:0; font-weight:800;">Settings</h2>
+            <button onclick="closeSets()" style="background:var(--border); border:none; width:35px; height:35px; border-radius:50%; font-weight:bold;">✕</button>
+        </div>
+        
+        <div class="section">
+            <label>Appearance</label>
+            <button class="btn-p" style="background:var(--txt); color:var(--card);" onclick="toggleDark()">Toggle Dark Mode</button>
+        </div>
+
+        <div class="section">
+            <label>Preferences</label>
+            <div style="margin-bottom:10px; font-size:0.9rem; display:flex; justify-content:space-between;">
+                <span>Volume</span>
+                <span id="volVal">80%</span>
+            </div>
+            <input type="range" id="vol" min="0" max="1" step="0.1" value="0.8" style="padding:0; height:6px;" oninput="updateVolUI()">
+        </div>
+        
+        <div id="secArea" class="section">
+            </div>
+    </div>
+</div>
+
+<div class="container" id="mainSwiper">
+    <div class="tabs">
+        <button id="bt1" class="active" onclick="goTab(1)">FOCUS</button>
+        <button id="bt2" onclick="goTab(2)">REMARKS</button>
+        <button id="bt3" onclick="goTab(3)">RECORDS</button>
+    </div>
+
+    <div id="tab1">
+        <div class="section">
+            <label>Current Task</label>
+            <input id="taskName" placeholder="e.g. Study SEC Regulations">
+            
+            <div style="display:flex; gap:15px;">
+                <div style="flex:1"><label>Focus (Min)</label><input type="number" id="fM" value="25"></div>
+                <div style="flex:1"><label>Rest (Min)</label><input type="number" id="rM" value="5"></div>
+            </div>
+
+            <div id="timerDisplay">00:00:00</div>
+            <div class="progress"><div id="bar"></div></div>
+            
+            <button class="btn-p" id="startBtn" onclick="start()">Start Session</button>
+            <button onclick="reset()" style="width:100%; border:none; background:none; margin-top:15px; font-weight:bold; color:var(--d); cursor:pointer; font-size:0.9rem;">Reset Timer</button>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:25px;">
+                <div style="background:var(--bg); padding:15px; border-radius:20px; text-align:center;"><label>Focus Total</label><b id="statF" style="font-size:1.1rem;">00:00:00</b></div>
+                <div style="background:var(--bg); padding:15px; border-radius:20px; text-align:center;"><label>Rest Total</label><b id="statR" style="font-size:1.1rem;">00:00:00</b></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab2" style="display:none;">
+        <div class="section">
+            <div id="live2" style="margin-bottom:15px; font-weight:800; color:var(--p); font-size:0.8rem; text-transform:uppercase;">Live: Standby</div>
+            <label>Daily Journal</label>
+            <textarea id="noteIn" rows="6" placeholder="What did you achieve during this session?"></textarea>
+            <button class="btn-p" onclick="saveNote()">Save to Records</button>
+        </div>
+    </div>
+
+    <div id="tab3" style="display:none;">
+        <div class="section">
+            <label>Select Date</label>
+            <input type="date" id="cal" onchange="loadData()">
+            
+            <div class="record-split">
+                <div class="split-col">
+                    <div class="split-title">📁 Session Logs</div>
+                    <div id="workList"></div>
+                </div>
+                <div class="split-col">
+                    <div class="split-title">📝 Remarks</div>
+                    <div id="remList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="alarmBox" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--p); z-index:5000; display:none; flex-direction:column; align-items:center; justify-content:center; color:white; text-align:center; padding:2rem;">
+    <h1 style="font-size:5rem; margin:0;">🔔</h1>
+    <h2 id="alarmMsg" style="font-size:2rem; font-weight:900;">SESSION COMPLETE</h2>
+    <p style="margin-bottom:2rem; opacity:0.9;">Great job keeping your focus!</p>
+    <button class="btn-p" onclick="dismissAlarm()" style="background:white; color:var(--p); max-width:250px;">I'm Ready</button>
+</div>
+
+<script>
+    const blob = new Blob([`let t=null; self.onmessage=e=>{if(e.data==='s'){t=setInterval(()=>self.postMessage('k'),1000)}else{clearInterval(t)}};`],{type:'text/javascript'});
+    const worker = new Worker(URL.createObjectURL(blob));
+
+    let time = 0, max = 0, isFocus = true, running = false, tab = 1;
+    let accF = 0, accR = 0;
+    let db = JSON.parse(localStorage.getItem('rf_v21')) || { logs: {}, notes: {} };
+    let pin = localStorage.getItem('rf_pin') || "";
+    let audio = new Audio("https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"); audio.loop = true;
+
+    // --- SWIPE LOGIC ---
+    let ts = 0;
+    document.getElementById('mainSwiper').addEventListener('touchstart', e => ts = e.touches[0].clientX);
+    document.getElementById('mainSwiper').addEventListener('touchend', e => {
+        let te = e.changedTouches[0].clientX;
+        if(ts - te > 80 && tab < 3) goTab(tab+1);
+        if(te - ts > 80 && tab > 1) goTab(tab-1);
+    });
+
+    // --- SECURITY & WELCOME ---
+    function unlock() {
+        if(document.getElementById('pinIn').value === pin || !pin) {
+            document.getElementById('lockScreen').classList.add('fade-out');
+            document.getElementById('welcomeOverlay').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('welcomeOverlay').classList.add('fade-out');
+                setTimeout(() => {
+                    document.getElementById('lockScreen').style.display = 'none';
+                    document.getElementById('welcomeOverlay').style.display = 'none';
+                }, 600);
+            }, 1500);
+        } else alert("Invalid PIN");
+    }
+
+    function updateSecUI() {
+        const area = document.getElementById('secArea');
+        if(!pin) {
+            area.innerHTML = `<label>Setup Security</label>
+                <input id="np" type="password" placeholder="Set New PIN">
+                <button class="btn-p" onclick="setPin()">Enable Lock</button>`;
+        } else {
+            area.innerHTML = `<label>Manage Security</label>
+                <input id="op" type="password" placeholder="Current PIN" style="margin-bottom:10px;">
+                <input id="up" type="password" placeholder="New PIN">
+                <button class="btn-p" onclick="changePin()">Update PIN</button>
+                <button onclick="delPin()" style="width:100%; margin-top:15px; border:none; background:none; color:var(--d); font-weight:700;">Disable Security</button>`;
+        }
+    }
+    function setPin() { 
+        const val = document.getElementById('np').value;
+        if(val) { pin = val; localStorage.setItem('rf_pin', pin); updateSecUI(); }
+    }
+
+    // --- TIMER ENGINE ---
+    worker.onmessage = () => {
+        if(time > 0) { 
+            time--; 
+            isFocus ? accF++ : accR++; 
+            updateUI(); 
+        } else { alarm(); }
+    };
+
+    function start() {
+        if(running) return;
+        time = (isFocus ? document.getElementById('fM').value : document.getElementById('rM').value) * 60;
+        max = time; running = true;
+        document.getElementById('startBtn').disabled = true;
+        worker.postMessage('s');
+    }
+
+    function alarm() {
+        worker.postMessage('p');
+        audio.play().catch(()=>{});
+        document.getElementById('alarmMsg').innerText = isFocus ? "FOCUS FINISHED" : "REST FINISHED";
+        document.getElementById('alarmBox').style.display = 'flex';
+    }
+
+    function dismissAlarm() {
+        audio.pause();
+        document.getElementById('alarmBox').style.display = 'none';
+        saveLog();
+        isFocus = !isFocus;
+        running = false;
+        start(); // Automatic loop
+    }
+
+    function updateUI() {
+        let m = Math.floor(time/60), s = time%60;
+        let str = `00:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        document.getElementById('timerDisplay').innerText = str;
+        document.getElementById('bar').style.width = (max-time)/max*100 + "%";
+        document.getElementById('bar').style.background = isFocus ? "var(--p)" : "var(--s)";
+        
+        const tag = document.getElementById('navTag');
+        tag.innerText = !running ? "Offline" : (isFocus ? "Focusing" : "Resting");
+        tag.className = "live-indicator " + (!running ? "tag-off" : (isFocus ? "tag-f" : "tag-r"));
+        
+        document.getElementById('live2').innerText = running ? `Live: ${str} (${isFocus?'Focus':'Rest'})` : "Live: Standby";
+        document.getElementById('statF').innerText = hms(accF);
+        document.getElementById('statR').innerText = hms(accR);
+    }
+
+    function hms(s) { return `${Math.floor(s/3600).toString().padStart(2,'0')}:${Math.floor((s%3600)/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
+
+    function goTab(n) {
+        tab = n;
+        document.querySelectorAll('.tabs button').forEach((b,i) => b.className = (i+1===n)?'active':'');
+        document.getElementById('tab1').style.display = n===1?'block':'none';
+        document.getElementById('tab2').style.display = n===2?'block':'none';
+        document.getElementById('tab3').style.display = n===3?'block':'none';
+        if(n===3) loadData();
+    }
+
+    function saveLog() {
+        const d = new Date().toISOString().split('T')[0];
+        const entry = { t: document.getElementById('taskName').value || "Unnamed Task", type: isFocus?'Focus':'Rest', dur: Math.floor(max/60), time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
+        if(!db.logs[d]) db.logs[d] = [];
+        db.logs[d].unshift(entry);
+        localStorage.setItem('rf_v21', JSON.stringify(db));
+    }
+
+    function saveNote() {
+        const d = new Date().toISOString().split('T')[0];
+        const val = document.getElementById('noteIn').value;
+        if(!val) return;
+        if(!db.notes[d]) db.notes[d] = [];
+        db.notes[d].unshift({ text: val, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+        localStorage.setItem('rf_v21', JSON.stringify(db));
+        document.getElementById('noteIn').value = "";
+        alert("Saved to Daily Journal");
+    }
+
+    function loadData() {
+        const d = document.getElementById('cal').value;
+        const wList = document.getElementById('workList');
+        const rList = document.getElementById('remList');
+        wList.innerHTML = ""; rList.innerHTML = "";
+
+        if(db.logs[d]) {
+            db.logs[d].forEach(l => wList.innerHTML += `<div class="mini-card"><b style="color:${l.type==='Focus'?'var(--p)':'var(--s)'}">${l.type}</b><br>${l.t}<br><small>${l.time}</small></div>`);
+        } else { wList.innerHTML = "<p style='font-size:0.7rem; opacity:0.5;'>No logs</p>"; }
+        
+        if(db.notes[d]) {
+            db.notes[d].forEach(n => rList.innerHTML += `<div class="mini-card"><b>${n.time}</b><br>${n.text}</div>`);
+        } else { rList.innerHTML = "<p style='font-size:0.7rem; opacity:0.5;'>No remarks</p>"; }
+    }
+
+    function updateVolUI() { document.getElementById('volVal').innerText = Math.round(document.getElementById('vol').value * 100) + "%"; audio.volume = document.getElementById('vol').value; }
+    function openSets() { document.getElementById('setMod').classList.add('active-modal'); updateSecUI(); }
+    function closeSets() { document.getElementById('setMod').classList.remove('active-modal'); }
+    function toggleDark() { document.body.classList.toggle('dark'); }
+    function reset() { worker.postMessage('p'); running=false; time=0; isFocus=true; updateUI(); document.getElementById('startBtn').disabled=false; }
+    
+    window.onload = () => { 
+        document.getElementById('cal').value = new Date().toISOString().split('T')[0];
+        if(!pin) document.getElementById('lockScreen').style.display='none';
+        updateSecUI();
+    };
+</script>
+</body>
+</html>
