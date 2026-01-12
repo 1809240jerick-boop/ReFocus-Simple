@@ -26,22 +26,24 @@
         label { font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; padding-left: 4px; }
         input, select, textarea { width: 100%; padding: 14px; border-radius: 16px; border: 1.5px solid var(--border); background: var(--bg); color: var(--txt); font-size: 1rem; margin-bottom: 15px; transition: 0.2s; }
 
-        #timerDisplay { font-size: 4.5rem; font-weight: 800; text-align: center; margin: 10px 0; font-family: 'Courier New', monospace; letter-spacing: -2px; }
+        /* Timer Size Fix */
+        #timerDisplay { font-size: 3.2rem; font-weight: 800; text-align: center; margin: 10px 0; font-family: 'Courier New', monospace; letter-spacing: -1px; width: 100%; }
+        
         .btn-p { background: var(--p); color: #fff; width: 100%; padding: 18px; border: none; border-radius: 20px; font-weight: 800; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
         .btn-p:disabled { opacity: 0.5; cursor: not-allowed; }
         
         .progress { width: 100%; height: 12px; background: #eee; border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
         #bar { width: 0%; height: 100%; background: var(--p); transition: 0.2s linear; }
 
-        .record-split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
-        .split-col { display: flex; flex-direction: column; gap: 8px; }
-        .split-header { font-size: 0.65rem; font-weight: 900; color: var(--p); text-transform: uppercase; margin-bottom: 5px; text-align: center; background: var(--bg); padding: 5px; border-radius: 8px; }
-        .mini-card { background: var(--bg); padding: 10px; border-radius: 14px; font-size: 0.75rem; border: 1px solid var(--border); line-height: 1.3; }
+        /* Record Columns Side-by-Side */
+        .record-split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .split-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+        .split-header { font-size: 0.6rem; font-weight: 900; color: var(--p); text-transform: uppercase; margin-bottom: 5px; text-align: center; background: var(--bg); padding: 6px; border-radius: 8px; }
+        .mini-card { background: var(--bg); padding: 10px; border-radius: 14px; font-size: 0.7rem; border: 1px solid var(--border); line-height: 1.3; word-wrap: break-word; }
+        .empty-msg { font-size: 0.6rem; color: #94a3b8; text-align: center; padding: 10px; }
 
         .full-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 1000; display: none; flex-direction: column; padding: 2rem; overflow-y: auto; }
         .active-modal { display: flex; }
-        #welcomeOverlay { background: var(--p); color: white; z-index: 2000; display: none; justify-content: center; align-items: center; }
-        .fade-out { opacity: 0; pointer-events: none; transition: 0.6s; }
     </style>
 </head>
 <body>
@@ -51,31 +53,23 @@
         <span style="letter-spacing:-0.5px;">ReFocus</span>
         <span id="navTag" class="live-indicator tag-off">Offline</span>
     </div>
-    <button style="background:var(--bg); border:none; width:40px; height:40px; border-radius:12px; cursor:pointer;" onclick="openSets()">⚙️</button>
+    <button style="background:var(--bg); border:none; width:40px; height:40px; border-radius:12px;" onclick="openSets()">⚙️</button>
 </header>
-
-<div id="welcomeOverlay">
-    <div style="text-align:center;">
-        <h1 style="font-size:5rem; margin:0;">🎯</h1>
-        <h2 style="font-size:1.8rem; font-weight:800;">Welcome Back, Jerick</h2>
-        <p style="opacity:0.8;">Syncing your focus sessions...</p>
-    </div>
-</div>
 
 <div id="lockScreen" class="full-overlay" style="display:flex; justify-content:center; align-items:center;">
     <div style="text-align:center; width:100%; max-width:300px;">
         <div style="font-size:4rem; margin-bottom:1rem;">🛡️</div>
-        <h2 style="margin:0 0 20px 0; font-weight:800;">App Locked</h2>
-        <input type="password" id="pinIn" placeholder="••••" style="text-align:center; font-size:2rem; letter-spacing:10px; border-radius:24px;">
-        <button class="btn-p" onclick="unlock()">Unlock Access</button>
+        <h2 style="font-weight:800;">App Locked</h2>
+        <input type="password" id="pinIn" placeholder="••••" style="text-align:center; font-size:2rem;">
+        <button class="btn-p" onclick="unlock()">Unlock</button>
     </div>
 </div>
 
 <div id="setMod" class="full-overlay">
     <div style="max-width:450px; margin:auto; width:100%;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
-            <h2 style="margin:0; font-weight:800;">Settings</h2>
-            <button onclick="closeSets()" style="background:var(--border); border:none; width:35px; height:35px; border-radius:50%; font-weight:bold;">✕</button>
+            <h2 style="font-weight:800;">Settings</h2>
+            <button onclick="closeSets()" style="background:var(--border); border:none; width:35px; height:35px; border-radius:50%;">✕</button>
         </div>
         <div class="section">
             <label>Appearance</label>
@@ -106,35 +100,31 @@
 
     <div id="tab1">
         <div class="section">
-            <label>Current Task</label>
-            <input id="taskName" placeholder="e.g. Study SEC Regulations">
+            <label id="phaseLabel">Focus Mode</label>
+            <input id="taskName" placeholder="Study SEC Jerick">
             <div style="display:flex; gap:15px;">
-                <div style="flex:1"><label>Focus (Min)</label><input type="number" id="fM" value="25"></div>
-                <div style="flex:1"><label>Rest (Min)</label><input type="number" id="rM" value="5"></div>
+                <div style="flex:1"><label>Focus (M)</label><input type="number" id="fM" value="25"></div>
+                <div style="flex:1"><label>Rest (M)</label><input type="number" id="rM" value="5"></div>
             </div>
-            <div id="timerDisplay">00:00:00</div>
+            <div id="timerDisplay">00:25:00</div>
             <div class="progress"><div id="bar"></div></div>
             <button class="btn-p" id="startBtn" onclick="start()">Start Session</button>
-            <button onclick="reset()" style="width:100%; border:none; background:none; margin-top:15px; font-weight:bold; color:var(--d); cursor:pointer; font-size:0.9rem;">Reset Timer</button>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:25px;">
-                <div style="background:var(--bg); padding:15px; border-radius:20px; text-align:center;"><label>Focus Total</label><b id="statF">00:00:00</b></div>
-                <div style="background:var(--bg); padding:15px; border-radius:20px; text-align:center;"><label>Rest Total</label><b id="statR">00:00:00</b></div>
-            </div>
+            <button onclick="reset()" style="width:100%; border:none; background:none; margin-top:15px; font-weight:bold; color:var(--d);">Reset</button>
         </div>
     </div>
 
     <div id="tab2" style="display:none;">
         <div class="section">
-            <div id="live2" style="margin-bottom:15px; font-weight:800; color:var(--p); font-size:0.8rem; text-transform:uppercase;">Live: Standby</div>
-            <label>Daily Journal</label>
-            <textarea id="noteIn" rows="8" placeholder="What did you achieve?"></textarea>
-            <button class="btn-p" onclick="saveNote()">Save to Records</button>
+            <div id="live2" style="margin-bottom:15px; font-weight:800; color:var(--p); font-size:0.8rem;">Live: Standby</div>
+            <label>Notes</label>
+            <textarea id="noteIn" rows="8" placeholder="Log progress..."></textarea>
+            <button class="btn-p" onclick="saveNote()">Save Remarks</button>
         </div>
     </div>
 
     <div id="tab3" style="display:none;">
-        <div class="section" style="padding: 1rem;">
-            <label>Select Date</label>
+        <div class="section">
+            <label>History</label>
             <input type="date" id="cal" onchange="loadData()">
             <div class="record-split">
                 <div class="split-col">
@@ -152,15 +142,16 @@
 
 <div id="alarmBox" style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--p); z-index:5000; display:none; flex-direction:column; align-items:center; justify-content:center; color:white; text-align:center; padding:2rem;">
     <h1 style="font-size:5rem; margin:0;">🔔</h1>
-    <h2 id="alarmMsg" style="font-size:2rem; font-weight:900;">SESSION COMPLETE</h2>
-    <button class="btn-p" onclick="dismissAlarm()" style="background:white; color:var(--p); max-width:250px;">I'm Ready</button>
+    <h2 id="alarmMsg" style="font-size:2rem; font-weight:900;">TIME IS UP</h2>
+    <p id="alarmSub" style="margin-bottom:2rem;">Prepare for the next phase.</p>
+    <button class="btn-p" onclick="dismissAlarm()" style="background:white; color:var(--p); width:200px;">Got it</button>
 </div>
 
 <script>
     const blob = new Blob([`let t=null; self.onmessage=e=>{if(e.data==='s'){t=setInterval(()=>self.postMessage('k'),1000)}else{clearInterval(t)}};`],{type:'text/javascript'});
     const worker = new Worker(URL.createObjectURL(blob));
 
-    let time = 0, max = 0, isFocus = true, running = false, tab = 1;
+    let time = 0, max = 0, isFocus = true, running = false;
     let accF = 0, accR = 0, endTime = null;
     let db = JSON.parse(localStorage.getItem('rf_v21')) || { logs: {}, notes: {} };
     let pin = localStorage.getItem('rf_pin') || "";
@@ -177,80 +168,76 @@
     // --- SECURITY ---
     function updateSecUI() {
         const area = document.getElementById('secArea');
-        if(!pin) {
-            area.innerHTML = `<label>Setup Security</label><input id="np" type="password" placeholder="Set PIN"><button class="btn-p" onclick="setPin()">Enable Lock</button>`;
-        } else {
-            area.innerHTML = `<label>Manage Security</label><input id="op" type="password" placeholder="Current PIN" style="margin-bottom:10px;"><input id="up" type="password" placeholder="New PIN"><button class="btn-p" onclick="changePin()">Update</button><button onclick="delPin()" style="width:100%; margin-top:15px; border:none; background:none; color:var(--d); font-weight:700;">Disable PIN</button>`;
-        }
+        area.innerHTML = !pin ? `<label>Security</label><input id="np" type="password" placeholder="Set PIN"><button class="btn-p" onclick="setPin()">Enable Lock</button>` :
+        `<label>Security</label><input id="op" type="password" placeholder="Old PIN" style="margin-bottom:10px;"><input id="up" type="password" placeholder="New PIN"><button class="btn-p" onclick="changePin()">Update</button><button onclick="delPin()" style="width:100%; margin-top:10px; color:var(--d); border:none; background:none;">Disable</button>`;
     }
-    function setPin() { const v = document.getElementById('np').value; if(v){pin=v; localStorage.setItem('rf_pin',pin); updateSecUI();}}
-    function changePin() { if(document.getElementById('op').value===pin){pin=document.getElementById('up').value; localStorage.setItem('rf_pin',pin); updateSecUI(); alert("Success");}}
+    function setPin() { let v=document.getElementById('np').value; if(v){pin=v; localStorage.setItem('rf_pin',v); updateSecUI();}}
+    function changePin() { if(document.getElementById('op').value===pin){pin=document.getElementById('up').value; localStorage.setItem('rf_pin',pin); updateSecUI();}}
     function delPin() { if(document.getElementById('op').value===pin){pin=""; localStorage.removeItem('rf_pin'); updateSecUI();}}
-    function unlock() { if(document.getElementById('pinIn').value===pin||!pin){document.getElementById('lockScreen').classList.add('fade-out'); document.getElementById('welcomeOverlay').style.display='flex'; setTimeout(()=>{document.getElementById('welcomeOverlay').classList.add('fade-out'); setTimeout(()=>{document.getElementById('lockScreen').style.display='none'; document.getElementById('welcomeOverlay').style.display='none';},600);},1000);}else alert("Wrong PIN");}
+    function unlock() { if(document.getElementById('pinIn').value===pin||!pin){document.getElementById('lockScreen').style.display='none';}else alert("Error");}
 
-    // --- TIMER ---
+    // --- CORE TIMER ---
     function start() {
         if(running) return;
-        let d = (isFocus?document.getElementById('fM').value:document.getElementById('rM').value)*60;
-        endTime = Date.now()+(d*1000); time=d; max=d; running=true;
-        document.getElementById('startBtn').disabled=true;
+        let mins = isFocus ? document.getElementById('fM').value : document.getElementById('rM').value;
+        time = mins * 60; max = time;
+        endTime = Date.now() + (time * 1000);
+        running = true;
+        document.getElementById('startBtn').disabled = true;
         worker.postMessage('s');
-        if(Notification.permission!=="granted") Notification.requestPermission();
     }
 
     worker.onmessage = () => {
         if(!running) return;
-        let rem = Math.round((endTime-Date.now())/1000);
-        if(rem>0){
-            time=rem; 
-            isFocus?accF++:accR++; 
-            updateUI();
+        let rem = Math.round((endTime - Date.now()) / 1000);
+        if(rem > 0) {
+            time = rem; isFocus ? accF++ : accR++; updateUI();
         } else {
-            time=0; 
-            updateUI(); 
-            alarm();
+            time = 0; updateUI(); triggerAlarm();
         }
     };
 
-    function alarm() { 
-        worker.postMessage('p'); 
-        audio.play().catch(()=>{}); 
-        document.getElementById('alarmMsg').innerText=isFocus?"FOCUS FINISHED":"REST FINISHED"; 
-        document.getElementById('alarmBox').style.display='flex'; 
-        if(Notification.permission==="granted") new Notification("Time's Up!");
+    function triggerAlarm() {
+        worker.postMessage('p');
+        audio.play();
+        document.getElementById('alarmMsg').innerText = isFocus ? "FOCUS COMPLETE" : "REST COMPLETE";
+        document.getElementById('alarmSub').innerText = isFocus ? "Time to take a break!" : "Time to get back to work!";
+        document.getElementById('alarmBox').style.display = 'flex';
     }
 
-    function dismissAlarm() { 
-        audio.pause(); 
-        document.getElementById('alarmBox').style.display='none'; 
-        saveLog(); 
-        isFocus=!isFocus; 
-        running=false; 
-        start();
+    function dismissAlarm() {
+        audio.pause();
+        audio.currentTime = 0; // STOP and RESET sound
+        document.getElementById('alarmBox').style.display = 'none';
+        
+        saveLog(); // Save the session just finished
+        
+        // INTERCHANGE MODE
+        isFocus = !isFocus; 
+        running = false;
+        
+        // PREPARE NEXT TIMER
+        let nextMins = isFocus ? document.getElementById('fM').value : document.getElementById('rM').value;
+        time = nextMins * 60;
+        updateUI();
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('phaseLabel').innerText = isFocus ? "Focus Mode" : "Rest Mode";
     }
 
     function updateUI() {
         let m=Math.floor(time/60), s=time%60;
-        let timeString = `00:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-        
-        // Sync Focus Tab Timer
-        document.getElementById('timerDisplay').innerText = timeString;
-        
-        // SYNC REMARKS TAB TIMER (Live Display)
-        document.getElementById('live2').innerText = running ? `Live: ${m}:${s.toString().padStart(2,'0')} (${isFocus?'Focusing':'Resting'})` : "Live: Standby";
-        
-        document.getElementById('bar').style.width = (max-time)/max*100 + "%";
+        let str = `00:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        document.getElementById('timerDisplay').innerText = str;
+        document.getElementById('live2').innerText = running ? `Live: ${m}:${s.toString().padStart(2,'0')} (${isFocus?'Focus':'Rest'})` : "Live: Standby";
+        document.getElementById('bar').style.width = ((max-time)/max*100) + "%";
         document.getElementById('bar').style.background = isFocus ? "var(--p)" : "var(--s)";
         
         const tag = document.getElementById('navTag');
         tag.className = "live-indicator " + (!running?"tag-off":(isFocus?"tag-f":"tag-r"));
         tag.innerText = !running?"Offline":(isFocus?"Focusing":"Resting");
-        
-        document.getElementById('statF').innerText = hms(accF); 
-        document.getElementById('statR').innerText = hms(accR);
     }
 
-    // --- DATA HANDLING ---
+    // --- DATA ---
     function saveLog() {
         const d = new Date().toISOString().split('T')[0];
         const entry = { t: document.getElementById('taskName').value || "Task", type: isFocus?'Focus':'Rest', time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) };
@@ -264,37 +251,36 @@
         if(!db.notes[d]) db.notes[d] = [];
         db.notes[d].unshift({ text: v, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
         localStorage.setItem('rf_v21', JSON.stringify(db));
-        document.getElementById('noteIn').value=""; alert("Saved!");
+        document.getElementById('noteIn').value=""; alert("Saved");
     }
     function loadData() {
         const d = document.getElementById('cal').value;
         const wL = document.getElementById('workList'); const rL = document.getElementById('remList');
         wL.innerHTML = ""; rL.innerHTML = "";
         if(db.logs[d]) db.logs[d].forEach(l => wL.innerHTML += `<div class="mini-card"><b style="color:${l.type==='Focus'?'var(--p)':'var(--s)'}">${l.type}</b><br>${l.t}<br><small>${l.time}</small></div>`);
+        else wL.innerHTML = '<div class="empty-msg">No Logs</div>';
         if(db.notes[d]) db.notes[d].forEach(n => rL.innerHTML += `<div class="mini-card"><b>${n.time}</b><br>${n.text}</div>`);
+        else rL.innerHTML = '<div class="empty-msg">No Notes</div>';
     }
 
-    // --- SETTINGS ---
-    function toggleDark() { const isD = document.body.classList.toggle('dark'); localStorage.setItem('rf_theme', isD?'dark':'light'); }
-    function changeSound(v) { audio.src = sounds[v]; localStorage.setItem('rf_sound', v); audio.play().then(()=>setTimeout(()=>audio.pause(),1000));}
+    // --- UTILS ---
+    function toggleDark() { const d = document.body.classList.toggle('dark'); localStorage.setItem('rf_theme', d?'dark':'light'); }
+    function changeSound(v) { audio.src = sounds[v]; localStorage.setItem('rf_sound', v); audio.play().then(()=>setTimeout(()=>audio.pause(),1000)); }
     function updateVolUI() { let v=document.getElementById('vol').value; document.getElementById('volVal').innerText=Math.round(v*100)+"%"; audio.volume=v; }
     function openSets() { updateSecUI(); document.getElementById('setMod').classList.add('active-modal'); }
     function closeSets() { document.getElementById('setMod').classList.remove('active-modal'); }
-    
     function goTab(n) { 
-        tab=n; 
-        document.querySelectorAll('.tabs button').forEach((b,i)=>b.className=(i+1===n)?'active':''); 
-        document.getElementById('tab1').style.display=n===1?'block':'none'; 
-        document.getElementById('tab2').style.display=n===2?'block':'none'; 
-        document.getElementById('tab3').style.display=n===3?'block':'none'; 
+        document.querySelectorAll('.tabs button').forEach((b,i)=>b.className=(i+1===n)?'active':'');
+        document.getElementById('tab1').style.display=n===1?'block':'none';
+        document.getElementById('tab2').style.display=n===2?'block':'none';
+        document.getElementById('tab3').style.display=n===3?'block':'none';
         if(n===3) loadData();
     }
-    function hms(s) { return `${Math.floor(s/3600).toString().padStart(2,'0')}:${Math.floor((s%3600)/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`; }
     function reset() { worker.postMessage('p'); running=false; time=0; updateUI(); document.getElementById('startBtn').disabled=false; }
 
     window.onload = () => {
         if(localStorage.getItem('rf_theme')==='dark') document.body.classList.add('dark');
-        const s = localStorage.getItem('rf_sound')||'digital'; document.getElementById('soundPick').value=s; audio.src=sounds[s];
+        const s = localStorage.getItem('rf_sound')||'digital'; audio.src=sounds[s]; document.getElementById('soundPick').value=s;
         document.getElementById('cal').value = new Date().toISOString().split('T')[0];
         if(!pin) document.getElementById('lockScreen').style.display='none';
         updateSecUI();
