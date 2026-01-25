@@ -1,6 +1,6 @@
 // 1. CHANGE THIS VERSION NUMBER TO TRIGGER AN UPDATE
 // When you update your code on GitHub, change 'v1' to 'v2', then 'v3', etc.
-const CACHE_NAME = 'refocus-v2'; 
+const CACHE_NAME = 'refocus-v3'; 
 
 const ASSETS_TO_CACHE = [
   './index.html',
@@ -48,4 +48,5 @@ self.addEventListener('fetch', (e) => {
     })
   );
 });
+
 
